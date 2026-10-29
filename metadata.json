@@ -1,0 +1,6 @@
+{
+  "name": "CueMaster Club Manager - Windows Desktop Edition",
+  "description": "Professional desktop Snooker & Pool Club Management System with real-time session timers, PKR billing, counter management, inventory, and financial reporting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

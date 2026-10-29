@@ -1,0 +1,866 @@
+# MASTER BUILD SPECIFICATION
+# Snooker Club Management Software — Windows Desktop Application
+
+## 1. YOUR ROLE AND MISSION
+
+Act as a senior desktop software architect, Electron engineer, React and TypeScript developer, PostgreSQL database engineer, UI/UX designer, security engineer, and QA specialist.
+
+Your mission is to build a complete, professional, reliable Snooker Club Management System for a real snooker club.
+
+This is a real business application, not a tutorial, mockup, mobile app, or static dashboard.
+
+You must create actual project files, implement working features, validate business logic, test what is possible, and prepare the application for Windows executable packaging.
+
+The final application must run in its own Windows desktop window and eventually be distributable as a Windows `.exe` installer.
+
+Do not stop after creating the dashboard or configuring Electron. Complete the application feature by feature.
+
+---
+
+# 2. THE MOST IMPORTANT ARCHITECTURAL DECISION
+
+## Build a native desktop application using Electron from the beginning
+
+Use this architecture:
+
+- Electron: desktop application runtime and window.
+- React: user interface.
+- TypeScript: application logic and types.
+- Vite: renderer development and production build.
+- Supabase: cloud PostgreSQL database and authentication if required.
+- PostgreSQL functions and transactions: reliable financial operations.
+- Electron Builder or an appropriate maintained packaging tool: Windows packaging.
+- Vitest and React Testing Library: unit and component tests.
+- Playwright or an equivalent tool when available: UI testing.
+
+Electron must be an actual part of the running application, not an unused configuration file added after a web application has been built.
+
+### Application architecture
+
+Separate the project into:
+
+1. Electron main process.
+2. Secure preload bridge, only where necessary.
+3. React renderer.
+4. Shared TypeScript types and validation.
+5. Supabase data-access layer.
+6. Database migrations and SQL functions.
+7. Automated tests.
+8. Build and packaging configuration.
+
+The React renderer is the interface inside the Electron desktop window. It is not the final deliverable by itself.
+
+Use Electron security best practices:
+- `contextIsolation: true`.
+- `nodeIntegration: false`.
+- Appropriate sandboxing.
+- A restricted preload API when required.
+- No unnecessary filesystem or operating-system access from the renderer.
+- No exposed secret keys.
+
+Never put a Supabase service-role key in renderer code.
+
+Do not add unnecessary backend infrastructure if Supabase and secure PostgreSQL functions can correctly implement the required operations.
+
+---
+
+# 3. DESKTOP-ONLY REQUIREMENT
+
+This is a Windows desktop application for a club operator working at a computer.
+
+It is NOT a mobile app.
+
+It is NOT a mobile-first website.
+
+It is NOT an Android application.
+
+It is NOT an APK.
+
+It must not be designed around a phone simulator.
+
+## Required desktop behavior
+
+- Open in its own Electron window.
+- Use the available window area naturally.
+- Have a normal desktop title bar and standard window controls.
+- Support resizing.
+- Use a sensible default size around 1440×900, subject to platform support.
+- Set a reasonable minimum usable window size.
+- Work at desktop resolutions such as 1366×768, 1440×900, and 1920×1080.
+- Expand naturally on larger screens.
+- Adapt to smaller desktop windows without overlapping or clipping.
+- Never use a fixed mobile width such as 375px or 390px.
+- Never rotate the application.
+- Never scale the whole application using CSS transforms, zoom hacks, or screenshot-based rendering.
+- Never create mobile navigation or mobile-specific screens.
+- Never constrain the entire application to a phone-sized container.
+
+Desktop resizing is required. Mobile support is not required.
+
+If the development environment shows a phone-shaped preview, do not assume that preview is the actual desktop application. Verify the configured Electron launch path and test the application in an actual desktop window whenever the environment supports it.
+
+Do not claim the desktop application works unless it has actually been launched or the limitation is clearly documented.
+
+---
+
+# 4. VISUAL DESIGN SPECIFICATION
+
+Create a premium, modern desktop business interface.
+
+## Color and appearance
+
+Use:
+- Warm cream and off-white backgrounds.
+- White cards and content surfaces.
+- Light orange and dark orange accents.
+- Dark, readable text.
+- Subtle borders.
+- Soft shadows.
+- Tasteful rounded corners.
+- Professional typography.
+- Consistent spacing and alignment.
+
+Use green and red only for meaningful statuses, such as successful connection, errors, or warnings.
+
+Do not use:
+- A dark theme.
+- Purple or unrelated accent themes.
+- Excessive gradients.
+- Oversized decorative graphics.
+- Distracting animations.
+- Tiny text.
+- Excessively narrow cards.
+- Overlapping labels.
+- Duplicated headings.
+- Blurry or screenshot-based UI.
+
+## Design principles
+
+- Prioritize operational clarity over decoration.
+- Use desktop-sized navigation and controls.
+- Use CSS Grid and Flexbox appropriately.
+- Avoid unnecessary absolute positioning.
+- Use normal document flow for content.
+- Do not set restrictive fixed heights on text containers.
+- Keep cards and forms readable.
+- Make mouse interactions comfortable.
+- Provide keyboard focus indicators.
+- Use subtle transitions rather than elaborate animations.
+- Keep the layout consistent across all application sections.
+
+Build reusable components and shared design tokens rather than styling every page independently.
+
+---
+
+# 5. REQUIRED APPLICATION NAVIGATION
+
+The application must have these main sections:
+
+1. Dashboard
+2. Tables
+3. Sales & Reports
+4. Inventory
+5. Expenses
+6. Counter Management
+7. Settings
+
+Use a suitable desktop sidebar or horizontal navigation. Choose the arrangement that best supports a club operator and the available desktop width.
+
+All sections must be discoverable and functional.
+
+Do not leave dead buttons, empty placeholder pages, or navigation items that lead nowhere in the completed product.
+
+During early development, placeholders may be used temporarily, but the final acceptance checklist must identify and eliminate incomplete required features.
+
+---
+
+# 6. DASHBOARD
+
+The dashboard is the main operational screen.
+
+## Header
+
+Display:
+- Club name and a suitable simple logo or icon.
+- Cloud/backend connection status.
+- Current counter status.
+- Appropriate settings access.
+
+The club name must be editable in Settings and saved to Supabase.
+
+## Summary cards
+
+Show:
+
+- Today's Sales.
+- Today's Expenses.
+- Completed Transactions.
+- Active Tables.
+- Current Counter Status.
+
+Use clear labels, readable values, and consistent currency formatting.
+
+All metrics must come from real persisted records, not hardcoded demo data.
+
+Distinguish between loading, empty, and error states. Never show misleading zero values if a failed query means the real value is unknown.
+
+## Category selector
+
+Display categories such as Snooker and Pool.
+
+The operator must be able to create and edit categories and configure each category's default per-minute rate.
+
+Selecting a category should smoothly update the table grid.
+
+## Table grid
+
+Show table cards that clearly display:
+- Table name.
+- Category.
+- Available or occupied status.
+- Start button when available.
+- Running duration when active.
+- Access to the current billing cart.
+
+Use a well-proportioned desktop grid with appropriate spacing.
+
+---
+
+# 7. CATEGORIES AND TABLES
+
+The operator must be able to manage:
+- Categories.
+- Category names.
+- Default rates per minute.
+- Tables assigned to categories.
+- Table names and basic table configuration.
+
+Examples:
+- Snooker.
+- Pool.
+
+All tables in a category use that category's default rate unless a rate is explicitly adjusted for a particular bill.
+
+Category rates must persist in Supabase.
+
+Changing a category rate must not alter existing historical bills or the applied rate of a running session.
+
+Use database constraints to prevent invalid configurations.
+
+Do not add unrelated membership, tournament, or customer loyalty systems.
+
+---
+
+# 8. SESSION TIMERS
+
+When an available table's Start button is clicked:
+
+- Validate that the backend is reachable.
+- Validate that the counter is open.
+- Validate that the table is available.
+- Create the session in Supabase.
+- Record a trustworthy session start timestamp.
+- Start displaying the running duration only after the operation is confirmed.
+
+If starting the session fails, the application must not pretend the game started successfully.
+
+A running table displays its elapsed time in a readable format.
+
+Provide a small cancellation control for an accidental start. Handle cancellation safely and require confirmation if appropriate.
+
+Clicking the running duration opens the billing cart.
+
+Closing the billing cart must not collect cash or automatically end the session.
+
+## Timer accuracy
+
+- Use persisted timestamps rather than treating a browser interval as the source of truth.
+- Recalculate elapsed duration from the session start timestamp.
+- Keep the duration accurate after UI updates or application reloads.
+- Do not silently reset an active timer.
+- Use Asia/Karachi as the business timezone for business dates and user-facing timestamps.
+
+---
+
+# 9. BILLING RULES
+
+These business rules are confirmed.
+
+## Currency
+
+Use Pakistani Rupees (PKR).
+
+Per-minute rates are entered in whole rupees.
+
+Use safe monetary calculations. Avoid floating-point arithmetic errors.
+
+## Duration rounding
+
+Round up to the next whole minute.
+
+Examples:
+- 1 second = 1 billable minute.
+- 60 seconds = 1 billable minute.
+- 61 seconds = 2 billable minutes.
+- 2 minutes 10 seconds = 3 billable minutes.
+
+The number of billable minutes is:
+
+`ceil(elapsed_seconds / 60)`
+
+For a zero-duration or invalid session, do not accidentally create a valid charge. Define and test the appropriate validation behavior.
+
+The table charge is:
+
+`billable_minutes × applicable_rate_per_minute`
+
+Keep the same billing policy across the interface, database functions, receipts or transaction views, reports, and automated tests.
+
+## Billing cart
+
+Clicking a running timer opens a billing/cart interface showing:
+
+- Table name.
+- Session start time.
+- Elapsed time.
+- Billable minutes.
+- Applied per-minute rate.
+- Table charge.
+- Selected products.
+- Product prices and quantities.
+- Product subtotal.
+- Final amount.
+
+The operator can edit the rate for the current bill. For example, changing the rate from PKR 6 to PKR 7 must immediately recalculate the table charge.
+
+Editing a current bill must not unexpectedly change category defaults or other active tables.
+
+The cart must allow drinks and snacks to be added from Inventory.
+
+Closing the cart does not collect cash.
+
+## Collect Cash
+
+When the operator clicks Collect Cash:
+
+1. Prevent duplicate submissions.
+2. Verify the current connection to the backend.
+3. Verify that the counter is open.
+4. Verify that the session is still active and belongs to the expected table.
+5. Validate the bill and selected products.
+6. Calculate the final total using the agreed rules.
+7. Submit the sale using a secure, atomic database operation.
+8. Save the sale and sale-item records.
+9. Mark the session completed.
+10. Release the table.
+11. Display success only after confirmed database completion.
+
+If any part of the transaction fails, do not leave inconsistent financial records.
+
+Use database-side transactions or a secure PostgreSQL function to ensure that sale creation, sale items, session completion, and table release succeed or fail together.
+
+Use idempotency or an equivalent reliable mechanism to prevent duplicate sales when a user double-clicks or retries after a timeout.
+
+If a request times out and its outcome is uncertain, check the database for the existing transaction before retrying.
+
+Preserve the current session and bill if collection fails, allowing safe recovery without duplicate charging.
+
+Store historical rate and product-price snapshots so later price changes do not rewrite completed transactions.
+
+Document any rounding or product-quantity rules not explicitly specified here before implementing them.
+
+---
+
+# 10. STRICT INTERNET REQUIREMENT
+
+The application is cloud-based. Internet access and successful backend communication are mandatory for starting games and collecting payments.
+
+If the required backend cannot be reached:
+
+- Disable Start.
+- Disable Collect Cash.
+- Display a clear explanation.
+- Do not create an offline session or sale.
+- Do not queue financial operations for later.
+- Do not automatically synchronize offline transactions.
+- Do not show success before server confirmation.
+
+Do not rely solely on `navigator.onLine` as proof that Supabase is reachable.
+
+Distinguish:
+- Connecting.
+- Connected.
+- Disconnected.
+- Request in progress.
+- Request failed.
+- Outcome uncertain and requiring verification.
+
+Use a reasonable connection-check strategy and timeouts without blocking the entire interface unnecessarily.
+
+Other screens may display cached visual state only if clearly distinguished from confirmed current server data. Do not allow stale state to authorize financial operations.
+
+The developer's personal computer must not be required to remain online. The deployed application connects to the configured Supabase cloud project.
+
+---
+
+# 11. COUNTER MANAGEMENT
+
+Implement opening and closing of a counter.
+
+## Open Counter
+
+The operator enters opening cash.
+
+Record:
+- Opening amount.
+- Opening timestamp.
+- Counter status.
+- Appropriate counter identifier.
+
+Prevent conflicting active counters according to the selected business rule.
+
+A counter must be open before a game can start or a sale can be collected.
+
+## Close Counter
+
+Display:
+- Opening cash.
+- Total completed cash sales for that counter.
+- Expected cash.
+- Counter start time.
+- Counter end time.
+
+Use this formula:
+
+`Expected cash = Opening cash + Completed cash sales`
+
+Expenses must NOT be subtracted from expected cash.
+
+After closing:
+- Disable starting new games.
+- Disable collecting cash.
+- Preserve historical records.
+- Allow previous counter reports to be viewed.
+
+Do not permit a sale to be associated with a closed counter.
+
+Use database-side checks to prevent concurrent or invalid counter operations.
+
+If the counter has active sessions at closing time, handle the situation explicitly and safely. Do not silently discard sessions or create inconsistent records.
+
+Choose a clear policy and document it. Prefer preventing counter closure until active sessions have been resolved, unless an alternative is deliberately implemented and tested.
+
+---
+
+# 12. SALES AND REPORTS
+
+Implement a functional Sales & Reports section.
+
+Required information:
+- Current counter sales.
+- Previous counter sales.
+- Completed transactions.
+- Historical sale timestamps.
+- Table names.
+- Session duration.
+- Applied rates.
+- Products sold.
+- Product quantities and prices.
+- Final transaction amounts.
+- Counter opening and closing timestamps.
+
+Use 12-hour time formatting with AM/PM everywhere the operator sees a time.
+
+Use Asia/Karachi for business-date boundaries and user-facing business timestamps.
+
+Distinguish between:
+- Sales revenue.
+- Expenses.
+- Expected cash.
+
+Do not subtract expenses from sales revenue.
+
+Reports must be based on persisted database data and must handle empty states and query failures accurately.
+
+Do not add unnecessary advanced analytics, forecasting, or unrelated reports.
+
+---
+
+# 13. INVENTORY
+
+Inventory is a simple product catalogue.
+
+Allow the operator to:
+- Add a product.
+- Edit its name.
+- Edit its price.
+- View available products.
+- Select products during billing.
+
+Examples include cold drinks and snacks.
+
+Do not implement:
+- Stock quantities.
+- Low-stock alerts.
+- Purchasing workflows.
+- Supplier management.
+- Unrequested inventory modules.
+
+Products included in completed bills must retain their original charged prices and names in historical transaction snapshots.
+
+Validate product prices and prevent invalid negative amounts.
+
+---
+
+# 14. EXPENSES
+
+Allow the operator to add and view expenses.
+
+Examples:
+- Tea.
+- Electricity.
+- Light repair.
+- Other ordinary club expenses.
+
+Each expense should store:
+- Expense name.
+- Amount in PKR.
+- Timestamp.
+- Appropriate counter association where applicable.
+- Any required audit metadata.
+
+Persist expenses in Supabase.
+
+Show today's expenses on the dashboard and display relevant historical expense records.
+
+Expenses must not reduce sales revenue or expected counter cash.
+
+Do not introduce expense approval workflows or accounting features that were not requested.
+
+---
+
+# 15. SETTINGS
+
+Provide basic settings:
+- Editable club name.
+- Category and rate management, where appropriate.
+- Essential configuration needed by this application.
+
+Persist settings in Supabase.
+
+Do not add unnecessary subscription management, multi-branch administration, payroll, membership plans, or customer relationship management.
+
+---
+
+# 16. DATABASE DESIGN
+
+Create and maintain SQL migrations for the required schema.
+
+Use these core entities where appropriate:
+
+- `categories`
+- `tables`
+- `sessions`
+- `inventory_products`
+- `sales`
+- `sale_items`
+- `expenses`
+- `counter_sessions`
+- `settings`
+
+Additional tables may be introduced only when justified by authentication, idempotency, auditing, or a genuine data-integrity requirement.
+
+Define:
+- Primary keys.
+- Foreign keys.
+- Appropriate indexes.
+- Required-field constraints.
+- Unique constraints.
+- Numeric precision and safe money storage.
+- Created and updated timestamps.
+- Status constraints.
+- Historical price snapshots.
+- Relationships between sessions, tables, counters, sales, and sale items.
+
+Use a documented and consistent money representation, such as integer minor units, if appropriate.
+
+Use database constraints and secure functions for critical invariants. Do not depend solely on frontend validation.
+
+Create actual migration files. Do not merely describe the schema in prose.
+
+## Supabase security
+
+- Use the appropriate publishable/anon key in the client.
+- Never expose a service-role or secret key.
+- Configure Row Level Security.
+- Restrict data access appropriately.
+- Do not use permissive policies simply to bypass authorization problems.
+- Document the authentication and authorization assumptions.
+- Ensure a public client cannot bypass critical financial validation.
+- Keep privileged operations within appropriately protected database functions.
+- Test the policies as far as the environment allows.
+
+If credentials are missing, create the required files and setup documentation, continue implementing independent work, and clearly report what requires user action.
+
+Never fabricate a successful Supabase connection.
+
+---
+
+# 17. TECHNICAL CODE QUALITY
+
+Use strict TypeScript wherever practical.
+
+Maintain:
+- Clear module boundaries.
+- Reusable components.
+- Typed database results.
+- Centralized validation.
+- A dedicated Supabase data-access layer.
+- Consistent error handling.
+- Shared date and currency utilities.
+- Consistent business rules.
+- Readable code.
+- Minimal unnecessary dependencies.
+
+Avoid:
+- One enormous React component.
+- Duplicated business logic.
+- Unexplained magic numbers.
+- Unsafe casts that conceal errors.
+- Empty event handlers.
+- Fake data presented as real data.
+- Hardcoded secrets.
+- Unnecessary abstractions.
+- Dead navigation items.
+- Unused dependencies.
+- Silent failures.
+
+Provide a `.env.example` with placeholders only and a comprehensive README.
+
+---
+
+# 18. TESTING
+
+Create automated tests for important logic.
+
+At minimum, test:
+
+### Billing
+- Zero-duration validation.
+- Exactly 60 seconds.
+- 61 seconds.
+- Multiple minutes.
+- Rate editing.
+- Product subtotal.
+- Final total.
+- Monetary precision.
+- Historical prices remaining unchanged.
+
+### Sessions
+- Successful start.
+- Start failure.
+- Cancellation.
+- Accurate duration after reload.
+- Duplicate start prevention.
+- Session completion.
+- Table release.
+
+### Sales
+- Successful collection.
+- Repeated clicks.
+- Duplicate retries.
+- Network timeout with uncertain outcome.
+- Database failure.
+- No success before server confirmation.
+- Atomicity of sale and session completion.
+
+### Counters
+- Opening cash.
+- Expected cash calculation.
+- Closed-counter restrictions.
+- Sales assigned to the correct counter.
+- Active-session handling during closing.
+
+### Expenses and inventory
+- Add and edit products.
+- Product selection during billing.
+- Add expenses.
+- Expense totals.
+- Expenses do not reduce sales or expected cash.
+
+### Connectivity and security
+- Backend unavailable.
+- Internet disconnected.
+- Supabase request failures.
+- Unauthorized access where testable.
+- RLS policy checks where real credentials and a suitable test environment are available.
+
+### UI and build
+- Navigation.
+- Forms and validation.
+- Dashboard loading states.
+- Desktop layout.
+- Production build.
+- Electron launch and packaging configuration.
+
+Run the available type checks, linting, tests, and production build.
+
+Fix reproducible failures.
+
+Report which tests actually ran and their results. Clearly distinguish mocked tests from tests against a real Supabase project.
+
+Do not claim that untested features work.
+
+---
+
+# 19. WINDOWS EXECUTABLE PACKAGING
+
+Prepare the application for Windows packaging using a suitable maintained Electron packaging tool.
+
+Provide:
+- A development command.
+- A renderer build command.
+- A production desktop launch command where practical.
+- A Windows packaging command.
+- Correct asset and icon handling.
+- Appropriate application metadata.
+- Clear packaging instructions.
+
+The final deliverable is a Windows `.exe` installer or executable, as supported by the chosen packaging configuration.
+
+Do not claim the `.exe` was generated unless the actual packaging command succeeded and the output artifact was verified.
+
+If the current environment is not Windows and cannot produce a Windows build, finish all possible implementation work, validate the configuration, and provide the exact steps needed to package it on a Windows computer.
+
+An APK does not satisfy this requirement.
+
+---
+
+# 20. PROJECT MANAGEMENT AND CONTINUATION
+
+This project is too large to safely implement as one giant response. Work incrementally and preserve progress.
+
+Create:
+
+- `PROJECT_STATUS.md`
+- `CHANGELOG.md`
+- `README.md`
+
+Keep `PROJECT_STATUS.md` accurate. It must list:
+- Architecture.
+- Current phase.
+- Completed features.
+- Files created or modified.
+- Database migrations.
+- Commands actually run.
+- Tests actually executed and their results.
+- Known defects.
+- Missing credentials or external dependencies.
+- Remaining tasks.
+- The exact next step.
+
+After each substantial phase:
+1. Update project status.
+2. Record important changes.
+3. Run the relevant tests.
+4. Fix failures that can be reproduced.
+5. Confirm the next step.
+
+If context or response limits approach:
+- Finish the current safe operation.
+- Save the latest progress.
+- Summarize what remains.
+- Resume from the project status file in the next session.
+- Do not regenerate completed files unnecessarily.
+- Do not restart the project.
+
+Make reasonable engineering decisions independently. Ask me only when a genuine business decision, credential, permission, or external limitation blocks progress.
+
+If one integration is blocked, continue with independent tasks.
+
+Do not repeatedly provide plans instead of implementing the project.
+
+---
+
+# 21. IMPLEMENTATION PHASES
+
+Follow this order.
+
+## Phase 1 — Environment and desktop foundation
+Inspect the environment, create the actual Electron + React + TypeScript + Vite structure, establish the secure Electron runtime, build the cream-orange desktop shell, and verify what can actually be launched.
+
+## Phase 2 — Database and security
+Create SQL migrations, schema, constraints, RLS policies, secure financial functions, and Supabase configuration.
+
+## Phase 3 — Categories and tables
+Implement category management, table management, rates, session creation, cancellation, and reliable timers.
+
+## Phase 4 — Billing
+Implement the cart, minute rounding, editable rates, product selection, sale creation, atomic completion, and duplicate prevention.
+
+## Phase 5 — Counter management
+Implement counter opening, closing, expected cash, and all counter-related restrictions.
+
+## Phase 6 — Inventory and expenses
+Implement product management and expense recording.
+
+## Phase 7 — Reports and settings
+Implement historical reports, current and previous counter data, dashboard metrics, and persistent club settings.
+
+## Phase 8 — Reliability and security review
+Test connectivity handling, historical data, transaction consistency, RLS, errors, and retry behavior.
+
+## Phase 9 — Desktop QA
+Verify desktop window sizing, readability, navigation, overflow, interactions, type checking, tests, and production builds.
+
+## Phase 10 — Windows packaging
+Validate Electron packaging and produce the Windows artifact if the environment supports it. Otherwise, provide precise Windows build instructions.
+
+Do not skip phases just to claim faster completion.
+
+---
+
+# 22. FINAL ACCEPTANCE CRITERIA
+
+The project is complete only when the following are implemented and verified to the extent the environment permits:
+
+- [ ] Real Electron desktop application architecture.
+- [ ] Own resizable desktop window.
+- [ ] Desktop-only layout with no mobile UI.
+- [ ] Premium cream-orange visual design.
+- [ ] All required navigation sections work.
+- [ ] Categories, tables, and rates persist.
+- [ ] Session timers remain accurate after reload.
+- [ ] Billing calculations follow the confirmed rounding rule.
+- [ ] Product selection and rate editing work.
+- [ ] Sale collection is atomic and duplicate-safe.
+- [ ] Financial actions require backend connectivity.
+- [ ] Counter opening and closing work.
+- [ ] Expenses do not reduce sales or expected cash.
+- [ ] Inventory and expenses persist.
+- [ ] Historical reports are accurate.
+- [ ] All displayed times use 12-hour AM/PM format.
+- [ ] Supabase configuration and RLS policies are reviewed.
+- [ ] Automated test results are documented.
+- [ ] Production build succeeds.
+- [ ] Electron packaging configuration is verified.
+- [ ] Windows `.exe` status is reported honestly.
+- [ ] README and project status files are complete.
+
+# BEGIN NOW
+
+Start by inspecting the actual environment and existing files.
+
+Then implement Phase 1 directly in the project.
+
+Do not start with a mobile web preview. Do not build an Android app. Do not produce only a mockup.
+
+Build the desktop foundation first, verify it honestly, and then continue through the phases until the required application is complete or a genuine external limitation prevents further progress.
+
+At the end of the first phase, report:
+1. The architecture created.
+2. The actual files created or modified.
+3. Whether the Electron desktop window was launched.
+4. Which checks were executed and passed.
+5. Any limitations.
+6. The next concrete implementation step.

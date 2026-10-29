@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="ballGrad" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#3A3836"/>
+      <stop offset="40%" stop-color="#1F1D1B"/>
+      <stop offset="100%" stop-color="#0D0C0B"/>
+    </radialGradient>
+    <radialGradient id="sheen" cx="30%" cy="25%" r="40%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="512" height="512" rx="100" fill="#24211E"/>
+  <rect x="8" y="8" width="496" height="496" rx="92" fill="none" stroke="#EA580C" stroke-width="4" stroke-opacity="0.4"/>
+
+  <!-- Snooker Table Green Inlay Ring -->
+  <circle cx="256" cy="256" r="180" fill="#1C3829" stroke="#2D5A42" stroke-width="6"/>
+
+  <!-- 8-Ball Body -->
+  <circle cx="256" cy="256" r="140" fill="url(#ballGrad)" filter="url(#shadow)"/>
+  <circle cx="256" cy="256" r="140" fill="url(#sheen)"/>
+
+  <!-- White Center Disc -->
+  <circle cx="256" cy="256" r="56" fill="#FBF8F3"/>
+
+  <!-- Number 8 -->
+  <text x="256" y="278" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="68" font-weight="900" fill="#1C1917" text-anchor="middle">8</text>
+
+  <!-- Accent Orange Pip -->
+  <circle cx="256" cy="410" r="10" fill="#EA580C"/>
+</svg>

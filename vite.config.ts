@@ -5,6 +5,7 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    base: './', // 👈 YEH LINE ADD KAR DI HAI (White screen fix)
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

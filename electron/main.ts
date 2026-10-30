@@ -14,7 +14,7 @@ function createWindow() {
     frame: false, // Custom styled desktop titlebar with Windows controls
     titleBarStyle: 'hidden',
     backgroundColor: '#FBF8F3',
-    show: false,
+    show: false, // Window ready hone tak nahi dikhegi
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
@@ -44,7 +44,12 @@ function createWindow() {
   } else if (isDev) {
     mainWindow.loadURL('http://localhost:3000');
   } else {
+    // Production (.exe) build mein local file load hogi
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+    
+    // 🚨 DEBUGGING KE LIYE: Agar .exe mein phir bhi white screen aaye, toh DevTools khul jayega
+    // Jab sab kuch sahi chalne lage, toh is line ko comment (//) kar dein
+    mainWindow.webContents.openDevTools(); 
   }
 }
 
